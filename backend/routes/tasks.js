@@ -171,4 +171,36 @@ router.delete('/:id', auth, async (req, res) => {
     }
 });
 
+
+// @route   GET /api/tasks/search
+// @desc    Search and filter tasks
+// @access  Private
+router.get('/search', auth, async (req, res) => {
+    const { title, category, priority, status } = req.query;
+
+    // Build query object
+    let query = { user: req.user.id };
+
+    if (title) {
+        query.title = { $regex: title, $options: 'i' }; // Case-insensitive search
+    }
+    if (category) {
+        query.category = category;
+    }
+    if (priority) {
+        query.priority = priority;
+    }
+    if (status) {
+        query.status = status;
+    }
+
+    try {
+        const tasks = await Task.find(query);
+        res.json(tasks);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 module.exports = router;
