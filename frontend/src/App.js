@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import Login from './components/Auth/Login';
+import Login from './components/auth/login';
 import Register from './components/Auth/Register';
 import TaskList from './components/Tasks/TaskList';
 import PrivateRoute from './components/privateRoute';
