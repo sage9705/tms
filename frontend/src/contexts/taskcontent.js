@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { api, socket } from '../services/api';
 
 const TaskContext = createContext();
 
@@ -10,7 +10,7 @@ export const TaskProvider = ({ children }) => {
 
     useEffect(() => {
         const fetchTasks = async () => {
-            const res = await axios.get('/api/tasks', {
+            const res = await api.get('/api/tasks', {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
@@ -21,31 +21,47 @@ export const TaskProvider = ({ children }) => {
         fetchTasks();
     }, []);
 
+    useEffect(() => {
+        socket.on('taskCreated', (task) => {
+            setTasks((prevTasks) => [...prevTasks, task]);
+        });
+
+        socket.on('taskUpdated', (updatedTask) => {
+            setTasks((prevTasks) =>
+                prevTasks.map((task) => (task._id === updatedTask._id ? updatedTask : task))
+            );
+        });
+
+        socket.on('taskDeleted', (taskId) => {
+            setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
+        });
+    }, []);
+
     const createTask = async (task) => {
-        const res = await axios.post('/api/tasks', task, {
+        const res = await api.post('/api/tasks', task, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
         });
-        setTasks([...tasks, res.data]);
+        setTasks((prevTasks) => [...prevTasks, res.data]);
     };
 
     const updateTask = async (id, updates) => {
-        const res = await axios.put(`/api/tasks/${id}`, updates, {
+        const res = await api.put(`/api/tasks/${id}`, updates, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
         });
-        setTasks(tasks.map((task) => (task._id === id ? res.data : task)));
+        setTasks((prevTasks) => prevTasks.map((task) => (task._id === id ? res.data : task)));
     };
 
     const deleteTask = async (id) => {
-        await axios.delete(`/api/tasks/${id}`, {
+        await api.delete(`/api/tasks/${id}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
         });
-        setTasks(tasks.filter((task) => task._id !== id));
+        setTasks((prevTasks) => prevTasks.filter((task) => task._id !== id));
     };
 
     return (
