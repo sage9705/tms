@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import TaskList from './components/Tasks/TaskList';
-import PrivateRoute from './components/PrivateRoute';
+import PrivateRoute from './components/privateRoute';
 
 const App = () => {
     return (
